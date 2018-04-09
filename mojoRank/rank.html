@@ -1,0 +1,436 @@
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>排行榜</title>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <script src="./js/amfe-flexible.js"></script>
+    <link rel="stylesheet" href="css/main1303.css">
+    <!--在iphone上让手机号成为超链接-->
+    <meta name="format-detection" content="telephone=no" />
+    <!--网页预加载开关-->
+    <meta http-equiv="x-dns-prefetch-control" content="on" >
+    <link rel="dns-prefetch" href="//matchapi.xq5.com">
+    <link rel="dns-prefetch" href="http://wx.qlogo.cn">
+    <link rel="dns-prefetch" href="http://thirdwx.qlogo.cn">
+</head>
+
+<body>
+<div id="all-wrap">
+    <!--提示框dom  style="display:none;" 不进行显示-->
+    <p id="warning-tip" style="display:none;"></p>
+
+    <!--顶部返回栏-->
+    <div class="back-ct">
+        <div class="back-button"></div>
+    </div>
+
+    <!--不包含顶部返回栏部分-->
+    <div class="not-back-ct-wrap">
+
+        <!--标题-->
+        <div class="title"><p>海选排名榜</p></div>
+
+        <div class="main-content">
+            <!--时间展示-->
+            <div class="show-date-ct">
+                <ul clas="show-date-ul">
+                    <li data-date="20180331">3.31</li>
+                    <li data-date="20180401">4.1</li>
+                    <li data-date="20180402">4.2</li>
+                    <li data-date="20180403">4.3</li>
+                    <li data-date="20180404">4.4</li>
+                    <li data-date="20180405">4.5</li>
+                    <li data-date="20180406">4.6</li>
+                    <li data-date="20180407">4.7</li>
+                </ul>
+            </div>
+
+            <!--排行详情表格-->
+            <div class="rank-detail-ct">
+                <table id="rank-detail-table">
+                    <thead id="rank-detail-thead">
+                    <tr>
+                        <th>名次</th>
+                        <th>昵称</th>
+                        <th>头像</th>
+                        <th>用户ID</th>
+                        <th>积分</th>
+                    </tr>
+                    </thead>
+                    <thead id="rank-detail-thead-clone">
+                    <tr>
+                        <th>名次</th>
+                        <th>昵称</th>
+                        <th>头像</th>
+                        <th>用户ID</th>
+                        <th>积分</th>
+                    </tr>
+                    </thead>
+                    <tbody id="rank-detail-tbody">
+                    </tbody>
+                </table>
+            </div>
+            <ul class="cur-user-rank-ul">
+                <!--<li class="rank-id">未上榜</li><li class="nick-name">理财</li><li class="avatar"><img src="//upload.jianshu.io/users/upload_avatars/2166980/72fe41a69002.jpg?imageMogr2/auto-orient/strip|imageView2/1/w/64/h/64" alt=""></li><li class="user-id">1561212</li><li class="integral">120</li>-->
+            </ul>
+            <p class="alternate-tips"></p>
+        </div>
+
+        <!--调试信息dom-->
+        <div id="test_info" style="display:none">
+            <div id="test_clear" style="text-align:center;background:#000;line-height:32px;">清空</div>
+            <div id="test_list" style="height:260px;overflow: hidden;overflow-y: auto;"></div>
+        </div>
+    </div>
+
+</div>
+</body>
+
+<script src="js/zepto.js"></script>
+
+<script>
+
+
+    //  检测Zepto 是否加载正常
+    var Zepto;
+    // var showWarningTip=true;
+    var warningTipElement = document.getElementById('warning-tip');
+    // 定义提示框方法
+    function warningTip(message, time,isShow) {
+        if (isShow){
+            warningTipElement.innerText = message;
+            warningTipElement.style.display = 'block';
+        }else {
+            warningTipElement.style.display = 'none';
+        }
+        if (time){
+            setTimeout(function () {
+                warningTipElement.style.display = 'none'
+            }, time)
+        }
+
+    }
+
+    var cur_user_has_rank;
+
+
+    // 检测zepto及js是否运行
+    (function testZepto() {
+        if (!Zepto) {
+            warningTip('缺少必备组件，请刷新重试', 5000,true)
+        } else {
+            warningTip('正在加载...',0,true)
+        }
+    }());
+
+    var showDateUl = $('.show-date-ct ul'),curUserRankUl=$('.cur-user-rank-ul'),rankDetailTbody=$('#rank-detail-tbody');
+
+    // 添加调试信息log
+    // function addLog(message) {
+    //     var newDiv = document.createElement('div');
+    //     newDiv.innerText = message;
+    //     document.getElementById('test_list').appendChild(newDiv);
+    // }
+    //
+    // $('#test_clear').click(function () {
+    //     document.getElementById('test_list').innerText = '';
+    // });
+
+
+    // // 获取token
+    // function getSearchVal(name) {
+    //     var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+    //     var r = window.location.search.substr(1).match(reg);
+    //     if (r != null) {
+    //         return decodeURIComponent(r[2]);
+    //     } else {
+    //         return;
+    //     }
+    // }
+    //
+    // token = getSearchVal('token');
+
+    // 获取当前日期 格式为2018-03-24  返回"2018-03-24"
+    function getCurrentDateObj(hasSeperator) {
+        // 获取当前日期
+        var date = new Date();
+        // 获取当前月份
+        var nowMonth = date.getMonth() + 1;
+        // 获取当前是几号
+        var strDate = date.getDate();
+        // 添加分隔符“-”
+        var seperator = "-";
+        var nowDate;
+
+        // 对月份进行处理，1-9月在前面添加一个“0”
+        if (nowMonth >= 1 && nowMonth <= 9) {
+            nowMonth = "0" + nowMonth;
+        }
+
+        // 对日进行处理，1-9号在前面添加一个“0”
+        if (strDate >= 0 && strDate <= 9) {
+            strDate = "0" + strDate;
+        }
+        if (hasSeperator){
+            // 最后拼接字符串，得到一个格式为(yyyy-MM-dd)的日期
+            nowDate = date.getFullYear() + seperator + nowMonth + seperator + strDate;
+        }else {
+            // 返回不带-的
+            nowDate = date.getFullYear()  + nowMonth  + strDate;
+        }
+
+
+        return nowDate
+    }
+
+    // 传递日期获取排行榜  日期格式为2018-03-24
+    function getRankData(date) {
+        cur_user_has_rank=false;
+        warningTip('正在加载...',0,true);
+        $.ajax({
+            type: 'POST',
+            // url: '//123.206.215.185:9101/v1/match/rank/list',
+            url: '//matchapi.xq5.com/v1/match/rank/list',
+            // headers: {
+            //     'x-xq5-jwt': token
+            // },
+            contentType: 'application/json',
+            data: JSON.stringify(date),
+            success: function (res) {
+                if (res.errno==='0'){
+                    warningTip('',0,false);
+                    curUserInfo.user_id = res.user_rank.user_id;
+                    curUserInfo.game_id = res.user_rank.game_id;
+                    curUserInfo.game_area_id = res.user_rank.game_area_id;
+                    curUserInfo.rank = res.user_rank.rank;
+                    curUserInfo.head_img = res.user_rank.head_img;
+                    curUserInfo.nick_name = res.user_rank.nick_name;
+                    curUserInfo.score = res.user_rank.score;
+                    alternate.start=res.start;
+                    alternate.end=res.end;
+                    // 所有排名数据
+                    var allRankDetailArray = res.head_rank;
+
+                    //先清空tbody内容
+                    rankDetailTbody.empty();
+
+                    // 添加table主体内容
+                    allRankDetailArray.forEach(function (item, index) {
+
+
+                        if (index < 3) {
+                            // 前三名采用特殊的class
+                            rankDetailTbody.append('<tr><td></td>' +
+                                '<td>' + item.nick_name + '</td>' +
+                                '<td><img  src="./images/loading.gif"  data-src="' + item.head_img + '" alt="' + item.nick_name + '"></td>' +
+                                '<td class="user-id" >' + item.user_id + '</td>' +
+                                '<td>' + item.score + '</td></tr>')
+                            $('#rank-detail-tbody tr').eq(index).find('td').eq(0).addClass('rank'+index)
+
+                        } else if(index>(alternate.start-2) && index<(alternate.end)){
+                            // 前12-16名添加候补标签
+                            rankDetailTbody.append('<tr><td><img src="./images/候补.png" alt="候补icon">' + item.rank + '</td>' +
+                                '<td>' + item.nick_name + '</td>' +
+                                '<td><img src="./images/loading.gif" data-src="' + item.head_img + '" alt="' + item.nick_name + '"></td>' +
+                                '<td class="user-id" >' + item.user_id + '</td>' +
+                                '<td>' + item.score + '</td></tr>')
+
+                        }else {
+                            rankDetailTbody.append('<tr><td>' + item.rank + '</td>' +
+                                '<td>' + item.nick_name + '</td>' +
+                                '<td><img src="./images/loading.gif" data-src="' + item.head_img + '" alt="' + item.nick_name + '"></td>' +
+                                '<td class="user-id" >' + item.user_id + '</td>' +
+                                '<td>' + item.score + '</td></tr>')
+
+                        }
+
+                        // 添加底部展示当前用户排名详情信息
+
+                        //  判断在所有数据中是否有当前用户id --存在--就上榜(curUserInfo当前用户信息；)
+                        if (curUserInfo.user_id===item.user_id){
+                            cur_user_has_rank=true;
+                            // 清空当前用户排名情况
+                            curUserRankUl.empty();
+                            curUserRankUl.append('<li class="rank-id">'+item.rank+'</li>' +
+                                '<li class="nick-name">'+item.nick_name+'</li>' +
+                                '<li class="avatar"><img src="'+item.head_img+'" alt="'+item.nick_name+'" ></li>' +
+                                '<li class="user-id">'+item.user_id+'</li>' +
+                                '<li class="integral">'+item.score+'</li>')
+
+                            // 在table主体中的当前用户行添加标识信息
+                            // $('#rank-detail-table tr').eq(index+1).css({fontWeight: 'bolder'})
+                            $('#rank-detail-tbody tr').eq(index).addClass('is-cur-user')
+
+                        }
+                    });
+
+                    // 添加底部展示当前用户排名详情信息---当前用户未上榜时
+                    if (!cur_user_has_rank){
+                        // 清空当前用户排名情况
+                        curUserRankUl.empty();
+                        if (curUserInfo.nick_name&&res.head_rank.length){
+                            // 参赛了的
+                            curUserRankUl.append('<li class="rank-id">未上榜</li>' +
+                                '<li class="nick-name">'+curUserInfo.nick_name+'</li>' +
+                                '<li class="avatar"><img src="'+curUserInfo.head_img+'" alt="'+curUserInfo.nick_name+'" ></li>' +
+                                '<li class="user-id">'+curUserInfo.user_id+'</li>' +
+                                '<li class="integral">'+curUserInfo.score+'</li>')
+                        }else {
+                            // 未参赛的或者不存在game_id=7&user_id=30&game_area_id=1&match_id=1
+                            warningTip('抱歉,无数据', 5000,true)
+                            curUserRankUl.append('<li class="rank-id">无数据</li>' +
+                                '<li class="nick-name">'+'无数据'+'</li>' +
+                                '<li class="avatar">无数据</li>' +
+                                '<li class="user-id">'+'无数据'+'</li>' +
+                                '<li class="integral">'+'无数据'+'</li>')
+                        }
+                    }
+
+                    // 首屏立即加载用户头像
+                    judgeShowlazyImg($('.rank-detail-ct'),$("#rank-detail-tbody tr td:nth-child(3)").find('img'))
+
+                    // 控制显示晋级及候补信息显示
+                    $('.alternate-tips').text('说明: 前'+(alternate.start-1)+'名直接晋级，'+alternate.start+'-'+alternate.end +'名为候补选手')
+                    // 调试信息相关
+                    // if (item.user_id === 32973939) {
+                    //     $('#test_info').css('display', 'block')
+                    // }
+                    // addLog('获取当前用户id:' + cur_user_id)
+
+                }else {
+                    warningTip('服务器错误:'+res.errmsg, 5000,true)
+                }
+            },
+            error: function () {
+                warningTip('连接服务器失败或参数错误，请重试或联系客服。'+sendData.match_id, 5000,true)
+            }
+        })
+    }
+
+    // 获取url中的参数
+    // ?game_id=7&user_id=30&game_area_id=1&match_id=1
+    function getSearchWordObj() {
+        var args = {};
+        var query = location.search.substring(1);
+        var pairs = query.split("&");
+        for (var i = 0; i < pairs.length; i++) {
+            var pos = pairs[i].indexOf('=');
+            if (pos === -1) continue;
+            var argname = pairs[i].substring(0, pos);// Extract the name
+            var value = pairs[i].substring(pos + 1);// Extract the value
+            value = decodeURIComponent(value);// Decode it, if needed
+            args[argname] = value;
+        }
+        return args;// 返回对象
+    }
+
+    // 发送请求的参数
+    //      ?game_id=7&user_id=2&game_area_id=1&match_id=1
+    var sendData={};
+    sendData.game_id = Number(getSearchWordObj().game_id);
+    sendData.user_id = Number(getSearchWordObj().user_id);
+    sendData.game_area_id = Number(getSearchWordObj().game_area_id);
+    sendData.match_id = Number(getSearchWordObj().match_id);
+
+    // 比赛开始及结束日期
+    var matchDate={start:"20180331",end:"20180407"};
+
+    // 如果超过比赛日期 自动指定日期为比赛开始的日期
+    if (Number(getCurrentDateObj(false))> Number(matchDate.end)){
+        sendData.match_date = matchDate.start;
+    }else {
+        sendData.match_date = getCurrentDateObj(false);
+    }
+    // sendData.match_date = "20180329";
+    // 排行榜显示条数
+    sendData.rank_number = 30;
+    // 候补数量
+    var alternate={};
+
+    // 当前用户的相关信息
+    var curUserInfo={};
+
+    // 文档加载完后就立即获取排行榜数据
+    $(function () {
+        // 改变按钮状态
+        showDateUl.find('li').each(function () {
+            var  $cur=$(this);
+            if ($cur.attr('data-date')===sendData.match_date){
+                $(this).addClass('choose-cur-date');
+                $(this).siblings().removeClass('choose-cur-date');
+            }
+        });
+        getRankData(sendData);
+    });
+
+    // 事件委托的方式发送
+    showDateUl.on('click', 'li', function () {
+        $(this).addClass('choose-cur-date');
+        $(this).siblings().removeClass('choose-cur-date');
+        sendData.match_date=$(this).attr('data-date');
+        getRankData(sendData)
+
+    });
+
+    // 用户头像使用懒加载技术
+
+    function judgeShowlazyImg($wrap,$imgArry) {
+        $imgArry.each(function () {
+            var $cur=$(this);
+            if ($cur.attr('isloaded')){
+                return
+            }else {
+                if (judgeVisible($wrap,$cur)){
+                    addLoadedAndSrc($cur)
+                }
+            }
+        })
+
+    }
+
+    // 设置已经加载了的标识
+    function addLoadedAndSrc($ele) {
+        $ele.attr("isloaded",true);
+        $ele.attr("src", $ele.attr("data-src"));
+    }
+
+    // 判断是否可见
+    function judgeVisible($wrap,$node){
+        var scrollH=$wrap.height()+$wrap.scrollTop(),
+            selfDoc1=$node.offset().top;
+        // selfDoc2=$node.position().top;
+        // console.log(selfDoc1,selfDoc2);
+
+        //     selfH=$node.height(); // 注意与jquery的区别
+        //     if (selfDoc < scrollH && scrollH < selfDoc+selfH ) {
+        //     return true
+        // }
+
+        if (selfDoc1 < scrollH) {
+            return true
+        }
+        else {
+            return false
+        }
+    }
+
+
+    // 监听用户滚动事件 按需加载头像
+    var timer=null;
+    $('.rank-detail-ct').on("scroll",function () {
+        // 滚动采用防抖的形式
+        clearTimeout(timer);
+        timer=setTimeout(function () {
+            judgeShowlazyImg($('.rank-detail-ct'),$("#rank-detail-tbody tr td:nth-child(3)").find('img'))
+
+        },300)
+
+    });
+
+</script>
+
+
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <meta charset="UTF-8">
+    <title>Vue实例测试</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+</head>
+<body>
+    <div id="vue_det">
+        <h1>site:{{site}}</h1>
+        <h2>url:{{url}}</h2>
+        <h3>{{details()}}</h3>
+        <h4>alexa:{{alexa}}</h4>
+    </div>
+
+    <script type="text/javascript">
+        //创建的数据对象
+        var data={site:"谷歌", url:"google.com", alexa:"10000"}
+        //当一个 Vue 实例被创建时，它向 Vue 的响应式系统中加入了其 data 对象中
+        // 能找到的所有的属性。当这些属性的值发生改变时，html 视图将也会产生相应的变化。
+        var vm =new Vue({
+            //el参数 它是dom元素中的id，data定义属性，methods用于定义函数
+            el:'#vue_det',
+            data:data,
+            methods:{
+                details:function () {
+                    return this.site+"-全球最伟大的公司";
+                }
+            }
+        })
+        //他们引用相同的对象
+        document.write(vm.a===data.a);//true
+        document.write("<br>");
+        //设置属性也会影响到原始数据
+        vm.site="中至";
+        document.write(data.site+"<br>")//中至
+        // ……反之亦然
+        data.alexa=1234;
+        document.write(vm.alexa)//1234
+        document.write("<br>")
+        //除了数据属性，Vue 实例还提供了一些有用的实例属性与方法。
+        // 它们都有前缀 $，以便与用户定义的属性区分开来。
+        document.write(vm.$data===data)
+    </script>
+</body>
+</html>

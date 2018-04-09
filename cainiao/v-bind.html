@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:v-bind="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Vue:v-bind</title>
+    <script src="https://cdn.bootcss.com/vue/2.2.2/vue.min.js"></script>
+</head>
+<style>
+.class1{
+    background: #444;
+    color: #eee;
+}
+</style>
+<body>
+    <div id="app">
+        <!--for规定标签label绑定到那个表单元素-->
+        <label for="r1">修改颜色</label>
+        <input type="checkbox" v-model="class1" id="r1">
+        <br><br>
+        <div v-bind:class="{'class1':class1}">
+            dirctive v-bind:class
+        </div>
+    </div>
+
+<script>
+    new Vue({
+        el:'#app',
+        data:{
+            class1:false
+        }
+    });
+</script>
+</body>
+</html>
