@@ -73,6 +73,7 @@
             <ul class="cur-user-rank-ul">
                 <!--<li class="rank-id">未上榜</li><li class="nick-name">理财</li><li class="avatar"><img src="//upload.jianshu.io/users/upload_avatars/2166980/72fe41a69002.jpg?imageMogr2/auto-orient/strip|imageView2/1/w/64/h/64" alt=""></li><li class="user-id">1561212</li><li class="integral">120</li>-->
             </ul>
+
             <p class="alternate-tips"></p>
         </div>
 
@@ -254,12 +255,12 @@
                         curUserRankUl.empty();
                         if (curUserInfo.nick_name&&res.head_rank.length){
                             // 参赛了的
-                            curUserRankUl.append('<li class="rank-id">未上榜</li><li class="nick-name">'+curUserInfo.nick_name+'</li><li class="avatar"><img src="'+curUserInfo.head_img+'" alt="'+curUserInfo.nick_name+'" ></li><li class="user-id">'+curUserInfo.user_id+'</li><li class="integral">'+curUserInfo.score+'</li>')
-                        }else {
-                            // 未参赛的或者不存在game_id=7&user_id=30&game_area_id=1&match_id=1
-                            warningTip('抱歉,无数据', 5000,true)
-                            curUserRankUl.append('<li class="rank-id">无数据</li><li class="nick-name">'+'无数据'+'</li><li class="avatar">无数据</li><li class="user-id">'+'无数据'+'</li><li class="integral">'+'无数据'+'</li>')
-                        }
+                        curUserRankUl.append('<li class="rank-id">未上榜</li><li class="nick-name">'+curUserInfo.nick_name+'</li><li class="avatar"><img src="'+curUserInfo.head_img+'" alt="'+curUserInfo.nick_name+'" ></li><li class="user-id">'+curUserInfo.user_id+'</li><li class="integral">'+curUserInfo.score+'</li>')
+                    }else {
+                        // 未参赛的或者不存在game_id=7&user_id=30&game_area_id=1&match_id=1
+                        warningTip('抱歉,无数据', 5000,true)
+                        curUserRankUl.append('<li class="rank-id">无数据</li><li class="nick-name">'+'无数据'+'</li><li class="avatar">无数据</li><li class="user-id">'+'无数据'+'</li><li class="integral">'+'无数据'+'</li>')
+                    }
                     }
 
                     // 首屏立即加载用户头像
